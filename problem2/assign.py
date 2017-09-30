@@ -20,14 +20,12 @@ def print_sol(board):
             result += "\n"
     return result
 
-# To check if adding student to team is cost effective (check for conflict of interest)
-def iscosteff(student, team):
-    indexi = listuserid.index(student)
-    for mem in team:
-        indexj = listuserid.index(mem)
-        if (mem_pref[indexi][indexj] == -1 or mem_pref[indexj][indexi] == -1):
-            return False
-    return True
+def trim(board):
+    s = []
+    for each_row in board:
+        if (not each_row == []):
+            s.append(each_row)
+    return s
 
 # Remove student from ith team and add him to nth team
 def add_student(board, n, i, student):
@@ -40,10 +38,11 @@ def add_student(board, n, i, student):
 def wrong_team_size(team):
     count = 0
     for mem in team:
-            index = listuserid.index(mem)
-            if (not listdict[index]['teamnum'] == 0):
-                if (not (len(team) == listdict[index]['teamnum'])):
-                    count += 1
+        index = listuserid.index(mem)
+        prefteam = listdict[index]['teamnum']
+        if (not (prefteam == "0")):
+            if (not (str(len(team)) == prefteam)):
+                count += 1
     return count
 
 # Calculate number of students who did not get team members of their choice
@@ -51,11 +50,9 @@ def notgotwanted(team):
     count = 0
     for memi in team:
         indexi = listuserid.index(memi)
-        if (not len(listdict[indexi]['wantedmem']) == 0):
-            for memj in team:
-                indexj = listuserid.index(memj)
-                if (not mem_pref[indexi][indexj] == 1):
-                        count += 1
+        for memj in listdict[indexi]['wantedmem']:
+            if (memj not in team):
+                count += 1              
     return count
 
 # Calculate number of student who got team member that they did not wanted to work with
@@ -63,10 +60,9 @@ def gotunwanted(team):
     count = 0
     for memi in team:
         indexi = listuserid.index(memi)
-        for memj in team:
-            indexj = listuserid.index(memj)
-            if (mem_pref[indexi][indexj] == -1):
-                        count += 1
+        for memj in listdict[indexi]['unwantedmem']:
+            if (memj in team):
+                count += 1
     return count
 
 # Define initial team arrangement as one student per team
@@ -114,27 +110,31 @@ def successor(board, i):
     for n in range(len(board)):
         if (not i == n):
             curr_size = len(board[n])
-            if (curr_size > 0 and curr_size < 3 and iscosteff(move_student, board[n])):
-                succ.append(add_student(board, n, i, move_student))                          
+            if (curr_size > 0 and curr_size < 3):
+                 temp = add_student(board, n, i, move_student)
+                 if (tot_cost(temp) <= curr_cost):
+                     succ.append(temp)
     return succ
 
-# Solve the problem        
+# Solve the problem recursively till all the team members of ith team are assigned to other teams
+def recur_solve(s, i):
+    if(not len(s[i]) == 0):
+        for x in successor(s, i):
+            fringe.append(x)
+            recur_solve(x, i)
+    return
+
+# Solve the problem by adding team member from ith team to other teams to find minimum cost
 def solve():
+    global fringe, curr_cost
     fringe = [initial_board()]
     s = getmin(fringe)
     for i in range(rows):
-        if(not len(s[i]) == 0):
-            for x in successor(s, i):
-                fringe.append(x)
-                if (not len(x[i]) == 0):
-                    for y in successor(x, i):
-                        fringe.append(y)
-                        if (not len(y[i]) == 0):
-                            for z in successor(y, i):
-                                fringe.append(z)
+        curr_cost = tot_cost(s)
+        recur_solve(s, i)
         s = getmin(fringe)
         fringe = [s]
-    return s
+    return s 
 
 # Store student preference to work with each other. (used to calculate the cost of a team) 
 def storepref():
@@ -185,5 +185,5 @@ storepref()
 # Solve the the problem and print final list of team with the time required to grade them.
 initial = []
 goal = solve()
-print (print_sol(goal))
+print (print_sol(trim(goal)))
 print (tot_cost(goal)) 
