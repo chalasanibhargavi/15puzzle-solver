@@ -14,7 +14,8 @@ Assignment 01
 - There were 19 observations in road-segments.txt with only 4 items; since it was too small 
   in comparision to overall dataset, we removed those observations.
 - We have used Dictionary to create bidirectional graph taking one city at a time as a key and rest all as values. 
-
+- For uniform cost and A*, we have used heapq module for priority queue implementation; 
+  For longtour, we implemented max heap and for remaining cost functions, we implemented min heap
 '''
 
 import sys
