@@ -67,7 +67,7 @@ Searh Algorithm: Uniform Cost: Depends on cost function
 		longtour: 
 		- Similar to uniform cost; since it was mentioned in the problem to not re-visit any city
 		BFS/DFS:
-		- traverse along the path without considering all edges with unit cost
+		- traverse along the path considering all edges with unit cost
 		- BFS: traverse along the breadth first (queue implementation)
 		- DFS: traverse along the depth first (stack implementation)
 		
