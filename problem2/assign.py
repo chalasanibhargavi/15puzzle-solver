@@ -4,8 +4,35 @@
 # Team - Ankita Alshi, Bhargavi Chalasa, Dheeraj Singh, 2017
 #
 # Comments:
+# Search Problem: write a program to find an assignment of students to teams that minimizes the total amount of 
+# work the course staff needs to do, subject to the constraint that no team may have more than 3 students.
+#
+# (1)State Space: Maximum N teams with combination of not more than 3 students per team. (where N is number of students)
+# Initial State: board arrangement having N teams, each team having one student. (where N is number of students)
+# Goal State: Set of teams such that all students belong to a team and every team contains max 3 students with least amount of work required.
+# Successor: It creates new combination teams removing one student from a team and adds it to others. States with cost less than current state is 
+# only passed as a successor. 
+# Cost: Cost is total cost to grade all the teams for given arrangement of team = N * (K + n * number of students who did not get their preference + 
+# m * number of students assigned to someone they requested not to work)
+#
+# (2) Search Algorithm: We have used beam search algorithm to solve this problem. Instaed of randomly initializing first set of states, we are 
+# starting with a board having N teams with one student per team. For this beam search the value of k for the loop we have taken as N (where N is
+# number of students). We are also using fringe in form of heap queue and selecting 2 states from heapqueue with least cost. Then the successors
+# of those two states are created and added to heapqueue. And we are not checking goal state in each loop. the goal state is the arrangement of teams
+# with least cost present in heap queue after N loops are done.
+#
+# (3) As number of student increases (N>100) the algorithm was taking a lot of time if we take 2 nsmallest states from heap queue, so for larger
+# number students we are taking only 1 smallest cost state to pass on to the successor function.
+#
+# References:
+# We have referenced following link to understand heapqueue implementation:
+# https://docs.python.org/3.0/library/heapq.html#heapq.nsmallest
+# We have referenced following links for List and dictionary methods:
+# https://www.tutorialspoint.com/python/python_lists.htm
+# https://www.tutorialspoint.com/python/python_dictionary.htm
+#
 
-
+from heapq import *
 import sys
 import datetime
 
@@ -69,30 +96,14 @@ def gotunwanted(team):
 def initial_board():
     for student in listuserid:
         initial.append([student])
-    return [val for val in initial]
-
-# Find the successor with lowest cost
-def getmin(board_list):
-    for x in range(len(board_list)):
-        if (x == 0):
-            mincost = tot_cost(board_list[x])
-            minindex = x
-        else:
-            curr_cost = tot_cost(board_list[x])
-            if (curr_cost < mincost):
-                mincost = tot_cost(board_list[x])
-                minindex = x
-    return board_list[minindex]
+    return initial
 
 # Calculate cost for a team
 def cost_team(team):
     if (len(team) == 0):
         return 0
     else:
-        number_wrongteamnum = wrong_team_size(team)
-        number_notgotwanted = notgotwanted(team)
-        number_gotunwanted = gotunwanted(team)
-        cost = k + (1 * number_wrongteamnum) + (n * number_notgotwanted) + (m * number_gotunwanted)
+        cost = k + (1 * wrong_team_size(team)) + (n * notgotwanted(team)) + (m * gotunwanted(team))
     return cost
 
 # Calculate total cost for given arrangement of teams
@@ -112,41 +123,42 @@ def successor(board, i):
             curr_size = len(board[n])
             if (curr_size > 0 and curr_size < 3):
                  temp = add_student(board, n, i, move_student)
-                 if (tot_cost(temp) <= curr_cost):
-                     succ.append(temp)
+                 succ_cost = tot_cost(temp)
+                 if (succ_cost <= curr_cost):
+                     succ.append([succ_cost, temp])
     return succ
 
 # Solve the problem recursively till all the team members of ith team are assigned to other teams
 def recur_solve(s, i):
     if(not len(s[i]) == 0):
         for x in successor(s, i):
-            fringe.append(x)
-            recur_solve(x, i)
+            heappush(fringe, (x[0], x[1]))
+            recur_solve(x[1], i)
     return
 
 # Solve the problem by adding team member from ith team to other teams to find minimum cost
 def solve():
     global fringe, curr_cost
-    fringe = [initial_board()]
-    s = getmin(fringe)
+    smin = []
+    fringe = []
+    s = initial_board()
+    curr_cost = tot_cost(s)
+    heappush(fringe, (curr_cost, s))
     for i in range(rows):
-        curr_cost = tot_cost(s)
-        recur_solve(s, i)
-        s = getmin(fringe)
-        fringe = [s]
+        if (i == 0):
+            recur_solve(s, i)
+        else:
+            for each in smin:
+                curr_cost = each[0]
+                s = each[1]
+                heappush(fringe, (curr_cost, s))
+                recur_solve(s, i)
+                
+        if (i == rows-1):
+            curr_cost, s = heappop(fringe)
+        else:
+            smin = nsmallest(nsmall, fringe)
     return s 
-
-# Store student preference to work with each other. (used to calculate the cost of a team) 
-def storepref():
-    for i in range(0, len(listuserid)):
-        for j in range(0, len(listuserid)):
-            if (i == j):
-                mem_pref[i][j] += 1
-            else:
-                if (listuserid[j] in listdict[i]['unwantedmem']):
-                    mem_pref[i][j] = -1
-                elif (listuserid[j] in listdict[i]['wantedmem']):
-                    mem_pref[i][j] += 1
 
 # Storin input data from file to dictionary
 def filetodict():
@@ -176,14 +188,14 @@ filetodict()
 
 # List of userids given
 listuserid = [a['userid'] for a in listdict]
-
-# Student preference stored in N*N list (where N is number of userids)
 rows = cols = len(listdict)
-mem_pref = [[0 for j in range(cols)] for i in range(rows)]
-storepref()
+if (rows > 50):
+    nsmall = 1
+else:
+    nsmall = 2
 
 # Solve the the problem and print final list of team with the time required to grade them.
 initial = []
 goal = solve()
 print (print_sol(trim(goal)))
-print (tot_cost(goal)) 
+print (tot_cost(goal))
