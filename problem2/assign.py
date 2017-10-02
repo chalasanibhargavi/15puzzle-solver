@@ -10,8 +10,10 @@
 # (1)State Space: Maximum N teams with combination of not more than 3 students per team. (where N is number of students)
 # Initial State: board arrangement having N teams, each team having one student. (where N is number of students)
 # Goal State: Set of teams such that all students belong to a team and every team contains max 3 students with least amount of work required.
-# Successor: It creates new combination teams removing one student from a team and adds it to others. 
-# Cost: Cost is total cost to grade all the teams for given arrangement of teams
+# Successor: It creates new combination teams removing one student from a team and adds it to others. States with cost less than current state is 
+# only passed as a successor. 
+# Cost: Cost is total cost to grade all the teams for given arrangement of team = N * (K + n * number of students who did not get their preference + 
+# m * number of students assigned to someone they requested not to work)
 #
 # (2) Search Algorithm: We have used beam search algorithm to solve this problem. Instaed of randomly initializing first set of states, we are 
 # starting with a board having N teams with one student per team. For this beam search the value of k for the loop we have taken as N (where N is
