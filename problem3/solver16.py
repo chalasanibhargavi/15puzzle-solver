@@ -29,9 +29,7 @@
 
 
 from heapq import *
-#import sys
-from datetime import datetime
-#import time
+import sys
 
 ##Function to get the initial board
 def get_board(fname):
@@ -251,7 +249,8 @@ def successors(board):
     return succ_list
 
 ## Get the initial board
-initial_board = get_board("input3.txt")
+file_name = sys.argv[1]
+initial_board = get_board(file_name)
 print "Initial board ",initial_board
 
 ## Required goal state
