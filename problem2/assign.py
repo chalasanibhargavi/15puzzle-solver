@@ -4,6 +4,31 @@
 # Team - Ankita Alshi, Bhargavi Chalasa, Dheeraj Singh, 2017
 #
 # Comments:
+# Search Problem: write a program to find an assignment of students to teams that minimizes the total amount of 
+# work the course staff needs to do, subject to the constraint that no team may have more than 3 students.
+#
+# (1)State Space: Maximum N teams with combination of not more than 3 students per team. (where N is number of students)
+# Initial State: board arrangement having N teams, each team having one student. (where N is number of students)
+# Goal State: Set of teams such that all students belong to a team and every team contains max 3 students with least amount of work required.
+# Successor: It creates new combination teams removing one student from a team and adds it to others. 
+# Cost: Cost is total cost to grade all the teams for given arrangement of teams
+#
+# (2) Search Algorithm: We have used beam search algorithm to solve this problem. Instaed of randomly initializing first set of states, we are 
+# starting with a board having N teams with one student per team. For this beam search the value of k for the loop we have taken as N (where N is
+# number of students). We are also using fringe in form of heap queue and selecting 2 states from heapqueue with least cost. Then the successors
+# of those two states are created and added to heapqueue. And we are not checking goal state in each loop. the goal state is the arrangement of teams
+# with least cost present in heap queue after N loops are done.
+#
+# (3) As number of student increases (N>100) the algorithm was taking a lot of time if we take 2 nsmallest states from heap queue, so for larger
+# number students we are taking only 1 smallest cost state to pass on to the successor function.
+#
+# References:
+# We have referenced following link to understand heapqueue implementation:
+# https://docs.python.org/3.0/library/heapq.html#heapq.nsmallest
+# We have referenced following links for List and dictionary methods:
+# https://www.tutorialspoint.com/python/python_lists.htm
+# https://www.tutorialspoint.com/python/python_dictionary.htm
+#
 
 from heapq import *
 import sys
